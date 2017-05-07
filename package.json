@@ -1,7 +1,11 @@
 {
-  "name": "slackbots",
+  "name": "gesher-bot",
   "version": "1.0.0",
-  "description": "",
+  "description": "Slackbot for Gesher Group.",
+  "repository": {
+    "url": "git@github.com:gesher-group/gesher-bot.git",
+    "type": "git"
+  },
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
