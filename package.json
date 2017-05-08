@@ -12,11 +12,13 @@
     "start": "node app.js"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
+    "babel": "^6.23.0",
     "body-parser": "^1.x.x",
     "express": "^4.x.x",
+    "node-env-file": "^0.1.8",
     "request": "^2.55.0",
-    "slack-node": "^0.1.8"
+    "slack": "^8.3.0"
   }
 }

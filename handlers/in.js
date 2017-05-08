@@ -1,23 +1,19 @@
-let request = require('request')
-let HOOK_URL = 'https://hooks.slack.com/services/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'
-let Slack = require('slack-node')
-const slack = new Slack(key);
+var request = require('request')
+var env = require('../tokens.js')
+var slack = require('slack')
+var HOOK_URL = 'https://hooks.slack.com/services/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'
 
-API_TOKEN = '-- api token --'
 
-slack = new Slack(apiToken);
+let bot = slack.rtm.client()
+let token = env.SLACK_BOT_TOKEN
 
-slack.api("users.list", function(err, response) {
-  console.log(response);
-});
+bot.hello(message => {
+  console.log(message)
+  // console.log(`Got a message: ${message}`)
+  bot.close()
+})
 
-slack.api('chat.postMessage', {
-  text:'hello from nodejs',
-  channel:'#general'
-}, function(err, response){
-  console.log(response);
-});
-
+bot.listen({token})
 
 module.exports = (req, res, next) => {
   console.log('in.js / req ', req)
