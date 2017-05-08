@@ -1,14 +1,14 @@
-var request = require('request')
+let request = require('request')
+let HOOK_URL = 'https://hooks.slack.com/services/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'
 
-var HOOK_URL = 'https://hooks.slack.com/services/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'
-
-module.exports = function (req, res, next) {
-  var text = req.body.text
-  var botPayload = {
+module.exports = (req, res, next) => {
+  console.log('in.js / req ', req)
+  let text = req.body.text
+  let botPayload = {
     text: text
   }
 
-  var options = {
+  let options = {
     url: HOOK_URL,
     method: 'POST',
     headers: {'Content-Type': 'urlencode'},
@@ -16,7 +16,7 @@ module.exports = function (req, res, next) {
   }
 
   // Start the request
-  request(options, function (error, response, body) {
+  request(options, (error, response, body) => {
     if (!error && response.statusCode === 200) {
       return res.status(200).end()
     }
