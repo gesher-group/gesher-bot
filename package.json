@@ -16,9 +16,10 @@
   "dependencies": {
     "babel": "^6.23.0",
     "body-parser": "^1.x.x",
+    "botkit": "^0.5.4",
+    "dotenv": "^4.0.0",
     "express": "^4.x.x",
     "node-env-file": "^0.1.8",
-    "request": "^2.55.0",
-    "slack": "^8.3.0"
+    "request": "^2.55.0"
   }
 }
