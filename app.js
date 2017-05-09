@@ -48,13 +48,13 @@ controller.hears(['call me (.*)', 'my name is (.*)'], 'direct_message,direct_men
 controller.hears(['what is my name', 'who am i'], 'direct_message,direct_mention,mention', (bot, message) => {
 
   controller.storage.users.get(message.user, (err, user) => {
-    if (user && user.name) bot.reply(message, `Your name is ${user.name}`)
+    if (user && user.name) bot.reply(message, `You are ${user.name}!`)
     else {
       bot.startConversation(message, (err, convo) => {
         if (!err) {
           convo.say('I do not know your name yet!')
           convo.ask('What should I call you?', (response, convo) => {
-            convo.ask('You want me to call you `' + response.text + '`?', [
+            convo.ask(`You want me to call you _${response.text}?_`, [
               {
                 pattern: 'yes',
                 callback: (response, convo) => {
@@ -89,7 +89,7 @@ controller.hears(['what is my name', 'who am i'], 'direct_message,direct_mention
                 if (!user) user = { id: message.user, }
                 user.name = convo.extractResponse('nickname')
                 controller.storage.users.save(user, (err, id) => {
-                  bot.reply(message, `Got it. I will call you ${user.name} from now on.'`)
+                  bot.reply(message, `Got it. I will call you ${user.name} from now on.`)
                 })
               })
             } else {
@@ -128,13 +128,12 @@ controller.hears(['shutdown'], 'direct_message,direct_mention,mention', (bot, me
 })
 
 
-controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your name'], 'direct_message,direct_mention,mention', (bot, message) => {
+controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your name'], 'direct_message, direct_mention, mention', (bot, message) => {
   const hostname = os.hostname()
   const uptime = formatUptime(process.uptime())
 
   bot.reply(message,
-    `:robot_face: I am a bot named <@ ${bot.identity.name}.` +
-    `I have been running for ${uptime} on ${hostname}.`)
+    `:robot_face: I'm ${bot.identity.name}, a bot built by the Gesher Labs team. I have been running for ${uptime} on ${hostname}.`)
 })
 
 function formatUptime (uptime) {
