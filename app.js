@@ -128,8 +128,8 @@ controller.hears(favDrinkTriggers, 'direct_message, direct_mention, mention', (b
     console.log(err)
     bot.startConversation(message, (err, convo) => {
       console.log(err)
-      convo.say('That is a really nice drink')
-      convo.ask('Can you get me one?', (response, convo) => {
+      convo.say('I love Pepsi mixed with Sprite!')
+      convo.ask('Do you think you could get me one?', (response, convo) => {
         convo.ask('Wait, sorry I did not hear you was that a yes or a no?', [
           {
             pattern: 'yes',
