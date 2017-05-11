@@ -28,6 +28,7 @@ controller.hears(['hello', 'hi'], 'direct_message, direct_mention, mention', (bo
 
   controller.storage.users.get(message.user, (err, user) => {
     if (err) console.log('ERROR!', err)
+    console.log('USER : ', user)
     if (user && user.name) bot.reply(message, `'Hello, ${user.name}.`)
     else bot.reply(message, 'Hello.')
   })
@@ -108,7 +109,13 @@ controller.hears(['what is my name', 'who am i'], 'direct_message,direct_mention
   })
 })
 
-controller.hears(['What is your favorite drink'], 'direct_message, direct_mention, mention', (bot, message) => {
+const favDrinkTriggers = [
+  'What is your favorite drink',
+  'What\'s your favorite drink',
+  'favorite drink'
+]
+
+controller.hears(favDrinkTriggers, 'direct_message, direct_mention, mention', (bot, message) => {
   bot.api.reactions.add({
     timestamp: message.ts,
     channel: message.channel,
@@ -207,7 +214,6 @@ controller.hears(['Tell me your story'], 'direct_message,direct_mention,mention'
         callback: (response, convo) => {
           convo.say('I was made in Santa Cruz, California like 3 days ago, theres not much to say!')
           convo.next()
-          setTimeout(() => { process.exit() }, 3000)
         }
       },
       {
