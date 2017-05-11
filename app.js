@@ -8,25 +8,26 @@ var Botkit = require('botkit')
 var os = require('os')
 
 var controller = Botkit.slackbot({
-  debug: true,
+  debug: true
 })
 
 var bot = controller.spawn({
   token: process.env.SLACK_BOT_TOKEN
 }).startRTM()
 
-controller.hears(['hello', 'hi'], 'direct_message, direct_mention, mention', (bot, message) => {
+if (!bot) console.log('ERR: Bot failed to load.')
 
+controller.hears(['hello', 'hi'], 'direct_message, direct_mention, mention', (bot, message) => {
   bot.api.reactions.add({
     timestamp: message.ts,
     channel: message.channel,
-    name: 'robot_face',
+    name: 'robot_face'
   }, (err, res) => {
     if (err) bot.botkit.log('Failed to add emoji reaction :(', err)
   })
 
-
   controller.storage.users.get(message.user, (err, user) => {
+    if (err) console.log('ERROR!', err)
     if (user && user.name) bot.reply(message, `'Hello, ${user.name}.`)
     else bot.reply(message, 'Hello.')
   })
@@ -36,18 +37,20 @@ controller.hears(['call me (.*)', 'my name is (.*)'], 'direct_message,direct_men
   let name = message.match[1]
 
   controller.storage.users.get(message.user, (err, user) => {
+    if (err) console.log('ERROR!', err)
     if (!user) user = { id: message.user }
     user.name = name
 
     controller.storage.users.save(user, (err, id) => {
+      if (err) console.log('ERROR!', err)
       bot.reply(message, `Got it. I will call you ${user.name} from now on.'`)
     })
   })
 })
 
 controller.hears(['what is my name', 'who am i'], 'direct_message,direct_mention,mention', (bot, message) => {
-
   controller.storage.users.get(message.user, (err, user) => {
+    if (err) console.log('ERROR!', err)
     if (user && user.name) bot.reply(message, `You are ${user.name}!`)
     else {
       bot.startConversation(message, (err, convo) => {
@@ -82,13 +85,15 @@ controller.hears(['what is my name', 'who am i'], 'direct_message,direct_mention
           }, {'key': 'nickname'}) // store the results in field "nickname"
 
           convo.on('end', (convo) => {
-            if (convo.status == 'completed') {
+            if (convo.status === 'completed') {
               bot.reply(message, 'OK! I will update my dossier...')
 
               controller.storage.users.get(message.user, (err, user) => {
-                if (!user) user = { id: message.user, }
+                if (err) console.log('ERROR!', err)
+                if (!user) user = { id: message.user }
                 user.name = convo.extractResponse('nickname')
                 controller.storage.users.save(user, (err, id) => {
+                  if (err) console.log('ERROR!', err)
                   bot.reply(message, `Got it. I will call you ${user.name} from now on.`)
                 })
               })
@@ -103,21 +108,19 @@ controller.hears(['what is my name', 'who am i'], 'direct_message,direct_mention
   })
 })
 
-// Part that I added, needs a lot of work
-// Asking user for a drink.
 controller.hears(['What is your favorite drink'], 'direct_message, direct_mention, mention', (bot, message) => {
-
   bot.api.reactions.add({
     timestamp: message.ts,
     channel: message.channel,
-    name: 'grinning',
+    name: 'grinning'
   }, (err, res) => {
     if (err) bot.botkit.log('Failed to add emoji reaction :(', err)
   })
 
-
   controller.storage.users.get(message.user, (err, user) => {
+    console.log(err)
     bot.startConversation(message, (err, convo) => {
+      console.log(err)
       convo.say('That is a really nice drink')
       convo.ask('Can you get me one?', (response, convo) => {
         convo.ask('Wait, sorry I did not hear you was that a yes or a no?', [
@@ -145,12 +148,12 @@ controller.hears(['What is your favorite drink'], 'direct_message, direct_mentio
         ])
       })
     })
+  })
 })
-// End the part that I wrote
-
 
 controller.hears(['shutdown'], 'direct_message,direct_mention,mention', (bot, message) => {
   bot.startConversation(message, (err, convo) => {
+    if (err) console.log('ERROR!', err)
     convo.ask('Are you sure you want me to shutdown?', [
       {
         pattern: bot.utterances.yes,
@@ -174,6 +177,7 @@ controller.hears(['shutdown'], 'direct_message,direct_mention,mention', (bot, me
 
 controller.hears(['tell me a secret'], 'direct_message,direct_mention,mention', (bot, message) => {
   bot.startConversation(message, (err, convo) => {
+    console.log('Tell me a secret threw an error: ', err)
     convo.ask('Are you sure you want to know?', [
       {
         pattern: bot.utterances.yes,
@@ -186,7 +190,7 @@ controller.hears(['tell me a secret'], 'direct_message,direct_mention,mention', 
         pattern: bot.utterances.no,
         default: true,
         callback: (response, convo) => {
-          convo.say('...akward. *coughs*')
+          convo.say('...awkward. *coughs*')
           convo.next()
         }
       }
@@ -194,28 +198,28 @@ controller.hears(['tell me a secret'], 'direct_message,direct_mention,mention', 
   })
 })
 
-controller.hears(['Tell me your story'], 'direct_message,direct_mention,mention', (bot,
-  message) => {
-    bot.startConversation(message, (err, convo) => {
-      convo.ask('My whole story?', [
-        {
-          pattern: bot.utterances.yes,
-          callback: (response, convo) => {
-            convo.say('I was made in Santa Cruz, California like 3 days ago, theres not much to say!')
-            convo.next()
-            setTimeout(() => { process.exit() }, 3000)
-          }
-        },
-        {
-          pattern: bot.utterances.no,
-          default: true,
-          callback: (response, convo) => {
-            convo.say('K then')
-            convo.next()
-          }
+controller.hears(['Tell me your story'], 'direct_message,direct_mention,mention', (bot, message) => {
+  bot.startConversation(message, (err, convo) => {
+    console.log(err)
+    convo.ask('My whole story?', [
+      {
+        pattern: bot.utterances.yes,
+        callback: (response, convo) => {
+          convo.say('I was made in Santa Cruz, California like 3 days ago, theres not much to say!')
+          convo.next()
+          setTimeout(() => { process.exit() }, 3000)
         }
-      ])
-    })
+      },
+      {
+        pattern: bot.utterances.no,
+        default: true,
+        callback: (response, convo) => {
+          convo.say('K then')
+          convo.next()
+        }
+      }
+    ])
+  })
 })
 
 controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your name'], 'direct_message, direct_mention, mention', (bot, message) => {
@@ -238,6 +242,6 @@ function formatUptime (uptime) {
     unit = 'hour'
   }
 
-  if (uptime != 1) unit = unit + 's'
+  if (uptime !== 1) unit = unit + 's'
   return `${uptime} ${unit}`
 }
