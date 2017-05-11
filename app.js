@@ -103,6 +103,51 @@ controller.hears(['what is my name', 'who am i'], 'direct_message,direct_mention
   })
 })
 
+// Part that I added, needs a lot of work
+// Asking user for a drink.
+controller.hears(['What is your favorite drink'], 'direct_message, direct_mention, mention', (bot, message) => {
+
+  bot.api.reactions.add({
+    timestamp: message.ts,
+    channel: message.channel,
+    name: 'grinning',
+  }, (err, res) => {
+    if (err) bot.botkit.log('Failed to add emoji reaction :(', err)
+  })
+
+
+  controller.storage.users.get(message.user, (err, user) => {
+    bot.startConversation(message, (err, convo) => {
+      convo.say('That is a really nice drink')
+      convo.ask('Can you get me one?', (response, convo) => {
+        convo.ask('Wait, sorry I did not hear you was that a yes or a no?', [
+          {
+            pattern: 'yes',
+            callback: (response, convo) => {
+              convo.say('Thank You!')
+              convo.stop()
+            }
+          },
+          {
+            pattern: 'no',
+            callback: (response, convo) => {
+              convo.say('Wow you are mean')
+              convo.stop()
+            }
+          },
+          {
+            default: true,
+            callback: (response, convo) => {
+              convo.repeat()
+              convo.stop()
+            }
+          }
+        ])
+      })
+    })
+})
+// End the part that I wrote
+
 
 controller.hears(['shutdown'], 'direct_message,direct_mention,mention', (bot, message) => {
   bot.startConversation(message, (err, convo) => {
