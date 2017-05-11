@@ -128,6 +128,29 @@ controller.hears(['shutdown'], 'direct_message,direct_mention,mention', (bot, me
 })
 
 
+controller.hears(['tell me a secret'], 'direct_message,direct_mention,mention', (bot, message) => {
+  bot.startConversation(message, (err, convo) => {
+    convo.ask('Are you sure you want to know?', [
+      {
+        pattern: bot.utterances.yes,
+        callback: (response, convo) => {
+          convo.say('I know how to count all the way to schfifty five.')
+          convo.next()
+        }
+      },
+      {
+        pattern: bot.utterances.no,
+        default: true,
+        callback: (response, convo) => {
+          convo.say('...akward. *coughs*')
+          convo.next()
+        }
+      }
+    ])
+  })
+})
+
+
 controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your name'], 'direct_message, direct_mention, mention', (bot, message) => {
   const hostname = os.hostname()
   const uptime = formatUptime(process.uptime())
