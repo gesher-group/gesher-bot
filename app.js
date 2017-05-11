@@ -171,8 +171,31 @@ controller.hears(['shutdown'], 'direct_message,direct_mention,mention', (bot, me
     ])
   })
 })
-
-
+// Beginning: John Lupu
+controller.hears(['Tell me your story'], 'direct_message,direct_mention,mention', (bot,
+  message) => {
+    bot.startConversation(message, (err, convo) => {
+      convo.ask('My whole story?', [
+        {
+          pattern: bot.utterances.yes,
+          callback: (response, convo) => {
+            convo.say('I was made in Santa Cruz, California like 3 days ago, theres not much to say!')
+            convo.next()
+            setTimeout(() => { process.exit() }, 3000)
+          }
+        },
+        {
+          pattern: bot.utterances.no,
+          default: true,
+          callback: (response, convo) => {
+            convo.say('K then')
+            convo.next()
+          }
+        }
+      ])
+    })
+})
+// End: John Lupu
 controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your name'], 'direct_message, direct_mention, mention', (bot, message) => {
   const hostname = os.hostname()
   const uptime = formatUptime(process.uptime())
