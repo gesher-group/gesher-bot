@@ -228,6 +228,32 @@ controller.hears(['Tell me your story'], 'direct_message,direct_mention,mention'
   })
 })
 
+
+//Dobrota's attempt at a convo
+controller.hears(['Fight ME'], 'direct_message,direct_mention,mention', (bot, message) => {
+  bot.startConversation(message, (err, convo) => {
+    console.log('Dobrota messed up! :() ', err)
+    convo.ask('With just you?', [
+      {
+        pattern: bot.utterances.yes,
+        callback: (response, convo) => {
+          convo.say('Hold on then, let me get my baseball bat')
+          convo.next()
+        }
+      },
+      {
+        pattern: bot.utterances.no,
+        default: true,
+        callback: (response, convo) => {
+          convo.say('AWW Dont be a such a chicken, son')
+          convo.next()
+        }
+      }
+    ])
+  })
+})
+
+
 controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your name'], 'direct_message, direct_mention, mention', (bot, message) => {
   const hostname = os.hostname()
   const uptime = formatUptime(process.uptime())
