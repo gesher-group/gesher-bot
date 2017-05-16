@@ -7,8 +7,18 @@ if (!process.env.SLACK_BOT_TOKEN) {
 var Botkit = require('botkit')
 var os = require('os')
 
+var admin = require('firebase-admin')
+var serviceAccount = require('./firebase-service-account-key.json')
+
+var fb = admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: 'https://gesher-bot.firebaseio.com'
+})
+
+var db = fb.database()
+
 var controller = Botkit.slackbot({
-  debug: true
+  debug: false
 })
 
 var bot = controller.spawn({
@@ -16,6 +26,27 @@ var bot = controller.spawn({
 }).startRTM()
 
 if (!bot) console.log('ERR: Bot failed to load.')
+
+controller.hears(['skills'], 'direct_message', (bot, message) => {
+  let skills = []
+  let name = ''
+
+  db.ref(`users/alexprice`).once('value').then(snapshot => {
+    const v = snapshot.val()
+    skills = v.skills
+    name = v.name
+
+    let skillList = ''
+
+    for (let s in skills) {
+      if (+s === skills.length - 1) skillList += `, ${skills[s]}.`
+      else if (+s !== 0) skillList += `, ${skills[s]}`
+      else skillList = skills[0]
+    }
+
+    bot.reply(message, `${name} is great at ${skillList}`)
+  })
+})
 
 controller.hears(['hello', 'hi'], 'direct_message, direct_mention, mention', (bot, message) => {
   bot.api.reactions.add({
