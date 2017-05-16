@@ -4,11 +4,10 @@ if (!process.env.SLACK_BOT_TOKEN) {
   process.exit(1)
 }
 
-var Botkit = require('botkit')
-var os = require('os')
-
 var admin = require('firebase-admin')
 var serviceAccount = require('./firebase-service-account-key.json')
+var Botkit = require('botkit')
+var os = require('os')
 
 var fb = admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -16,10 +15,7 @@ var fb = admin.initializeApp({
 })
 
 var db = fb.database()
-
-var controller = Botkit.slackbot({
-  debug: false
-})
+var controller = Botkit.slackbot({ debug: false })
 
 var bot = controller.spawn({
   token: process.env.SLACK_BOT_TOKEN
@@ -27,15 +23,13 @@ var bot = controller.spawn({
 
 if (!bot) console.log('ERR: Bot failed to load.')
 
-controller.hears(['skills'], 'direct_message', (bot, message) => {
+controller.hears(['show skills'], 'direct_message', (bot, message) => {
+  const user = message.user
   let skills = []
-  let name = ''
 
-  db.ref(`users/alexprice`).once('value').then(snapshot => {
+  db.ref(`users/${user}`).once('value').then(snapshot => {
     const v = snapshot.val()
     skills = v.skills
-    name = v.name
-
     let skillList = ''
 
     for (let s in skills) {
@@ -44,7 +38,49 @@ controller.hears(['skills'], 'direct_message', (bot, message) => {
       else skillList = skills[0]
     }
 
-    bot.reply(message, `${name} is great at ${skillList}`)
+    bot.reply(message, `<@${user}> is great at ${skillList}`)
+  })
+})
+
+function writeSkills (newSkills, uid) {
+  for (let s in newSkills) {
+    if (newSkills[s].charAt(0) === ' ') newSkills[s].substring(1)
+  }
+
+  db.ref(`users/${uid}`).once('value').then(snapshot => {
+    if (snapshot.val() !== null) {
+      let oldSkills = snapshot.val().skills
+      newSkills.push(oldSkills)
+    }
+
+    db.ref('users').child(uid).set({
+      'skills': newSkills
+    })
+  })
+}
+
+controller.hears(['write skills'], 'direct_message', (bot, message) => {
+  bot.startConversation(message, (err, convo) => {
+    if (err) console.log('ERROR!', err)
+    convo.ask(`Okay, let's add skills to your account. Tell me what skills you'd like to add, seperated by commas. _(ex: cat herding, goat racing)_\n\nOr, type \`cancel\` to exit.`, [
+      {
+        pattern: 'cancel',
+        callback: (response, convo) => {
+          convo.say('Okay, cancelled.')
+          convo.next()
+        }
+      },
+      {
+        pattern: '(*)',
+        default: true,
+        callback: (response, convo) => {
+          writeSkills(response.text.split(','), response.user)
+          // TODO save skills
+          convo.say('Skills saved!')
+          convo.next()
+        }
+      }
+    ])
   })
 })
 
@@ -259,8 +295,6 @@ controller.hears(['Tell me your story'], 'direct_message,direct_mention,mention'
   })
 })
 
-
-//Dobrota's attempt at a convo
 controller.hears(['Fight ME'], 'direct_message,direct_mention,mention', (bot, message) => {
   bot.startConversation(message, (err, convo) => {
     console.log('Dobrota messed up! :() ', err)
@@ -283,7 +317,6 @@ controller.hears(['Fight ME'], 'direct_message,direct_mention,mention', (bot, me
     ])
   })
 })
-
 
 controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your name'], 'direct_message, direct_mention, mention', (bot, message) => {
   const hostname = os.hostname()
