@@ -272,22 +272,29 @@ controller.hears(['tell me a secret'], 'direct_message,direct_mention,mention', 
   })
 })
 
-controller.hears(['Tell me your story'], 'direct_message,direct_mention,mention', (bot, message) => {
+controller.hears(['wake up'], 'direct_message,direct_mention,mention', (bot, message) => {
   bot.startConversation(message, (err, convo) => {
     console.log(err)
-    convo.ask('My whole story?', [
+    convo.ask('When you wake regain consciousness you feel yourself falling. Around you are rings of fire. As you go down the flames seem to raise higher. And it burns! Eventually you land and see a lake and a bridge', [
       {
-        pattern: bot.utterances.yes,
+        pattern: bot.utterances.lake,
         callback: (response, convo) => {
-          convo.say('I was made in Santa Cruz, California like 3 days ago, theres not much to say!')
+          convo.say('A lady raises up out of the lake and offers you a weapon. Do you take a sword or bow?')
           convo.next()
         }
       },
       {
-        pattern: bot.utterances.no,
+        pattern: bot.utterances.sword,
+        callback: (response, convo) => {
+          convo.say('You grab the sword. Maybe you should practice.')
+          convo.next()
+        }
+      },
+      {
+        pattern: bot.utterances.bridge,
         default: true,
         callback: (response, convo) => {
-          convo.say('K then')
+          convo.say('U ded sorry :/')
           convo.next()
         }
       }
