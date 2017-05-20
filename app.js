@@ -1,88 +1,41 @@
+// Load environment variables
 require('dotenv').load()
+
 if (!process.env.SLACK_BOT_TOKEN) {
   console.log('Error: Specify token in environment')
   process.exit(1)
 }
 
-var admin = require('firebase-admin')
-var serviceAccount = require('./firebase-service-account-key.json')
-var Botkit = require('botkit')
-var os = require('os')
-
-var fb = admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+// Instantiate Firebase DB
+const firebaseAdmin = require('firebase-admin')
+const serviceAccount = require('./firebase-service-account-key.json')
+const firebase = firebaseAdmin.initializeApp({
+  credential: firebaseAdmin.credential.cert(serviceAccount),
   databaseURL: 'https://gesher-bot.firebaseio.com'
 })
+const db = firebase.database()
 
-var db = fb.database()
-var controller = Botkit.slackbot({ debug: false })
-
-var bot = controller.spawn({
+// Instantiate Botkit
+const Botkit = require('botkit')
+const os = require('os')
+const controller = Botkit.slackbot({ debug: false })
+const bot = controller.spawn({
   token: process.env.SLACK_BOT_TOKEN
 }).startRTM()
 
 if (!bot) console.log('ERR: Bot failed to load.')
 
-controller.hears(['show skills'], 'direct_message', (bot, message) => {
-  const user = message.user
-  let skills = []
+// Conversation, Show Skills
+// This conversation allows the user to see a list of skills they've added to gesher-bot's database.
+let showSkills = require('./conversations/show-skills')
+showSkills = showSkills.showSkills
+controller.hears(['show skills'], 'direct_message', (bot, message) => showSkills(bot, message, db))
 
-  db.ref(`users/${user}`).once('value').then(snapshot => {
-    const v = snapshot.val()
-    skills = v.skills
-    let skillList = ''
-
-    for (let s in skills) {
-      if (+s === skills.length - 1) skillList += `, ${skills[s]}.`
-      else if (+s !== 0) skillList += `, ${skills[s]}`
-      else skillList = skills[0]
-    }
-
-    bot.reply(message, `<@${user}> is great at ${skillList}`)
-  })
-})
-
-function writeSkills (newSkills, uid) {
-  for (let s in newSkills) {
-    if (newSkills[s].charAt(0) === ' ') newSkills[s].substring(1)
-  }
-
-  db.ref(`users/${uid}`).once('value').then(snapshot => {
-    if (snapshot.val() !== null) {
-      let oldSkills = snapshot.val().skills
-      newSkills.push(oldSkills)
-    }
-
-    db.ref('users').child(uid).set({
-      'skills': newSkills
-    })
-  })
-}
-
-controller.hears(['write skills'], 'direct_message', (bot, message) => {
-  bot.startConversation(message, (err, convo) => {
-    if (err) console.log('ERROR!', err)
-    convo.ask(`Okay, let's add skills to your account. Tell me what skills you'd like to add, seperated by commas. _(ex: cat herding, goat racing)_\n\nOr, type \`cancel\` to exit.`, [
-      {
-        pattern: 'cancel',
-        callback: (response, convo) => {
-          convo.say('Okay, cancelled.')
-          convo.next()
-        }
-      },
-      {
-        pattern: '(*)',
-        default: true,
-        callback: (response, convo) => {
-          writeSkills(response.text.split(','), response.user)
-          // TODO save skills
-          convo.say('Skills saved!')
-          convo.next()
-        }
-      }
-    ])
-  })
-})
+// Conversation, Write Skills
+// This conversation allows the user to add skills to gesher-bot's database.
+let writeSkills = require('./conversations/write-skills')
+writeSkills = writeSkills.writeSkills
+controller.hears(['write skills'], 'direct_message', (bot, message) => writeSkills(bot, message, db))
 
 controller.hears(['hello', 'hi'], 'direct_message, direct_mention, mention', (bot, message) => {
   bot.api.reactions.add({
