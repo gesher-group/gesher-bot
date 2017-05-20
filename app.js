@@ -15,8 +15,9 @@ var bot = controller.spawn({
   token: process.env.SLACK_BOT_TOKEN
 }).startRTM()
 
-controller.hears(['hello', 'hi'], 'direct_message, direct_mention, mention', (bot, message) => {
-
+controller.hears(['hello', 'hi', 'hey'],
+  'direct_message, direct_mention, mention',
+  (bot, message) => {
   bot.api.reactions.add({
     timestamp: message.ts,
     channel: message.channel,
@@ -24,7 +25,6 @@ controller.hears(['hello', 'hi'], 'direct_message, direct_mention, mention', (bo
   }, (err, res) => {
     if (err) bot.botkit.log('Failed to add emoji reaction :(', err)
   })
-
 
   controller.storage.users.get(message.user, (err, user) => {
     if (user && user.name) bot.reply(message, `'Hello, ${user.name}.`)
