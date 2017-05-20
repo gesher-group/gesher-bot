@@ -40,3 +40,5 @@ jspm_packages
 tokens.js
 
 .env
+
+firebase-service-account-key.json

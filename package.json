@@ -19,6 +19,7 @@
     "botkit": "^0.5.4",
     "dotenv": "^4.0.0",
     "express": "^4.x.x",
+    "firebase-admin": "^4.2.1",
     "node-env-file": "^0.1.8",
     "request": "^2.55.0"
   }
