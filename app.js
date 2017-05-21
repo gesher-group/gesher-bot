@@ -25,6 +25,23 @@ const bot = controller.spawn({
 
 if (!bot) console.log('ERR: Bot failed to load.')
 
+controller.hears(['help', 'roadmap', 'what do you do'], ['direct_message', 'mention'], (bot, message) => {
+  bot.api.reactions.add({
+    timestamp: message.ts,
+    channel: message.channel,
+    name: 'wave'
+  })
+
+  bot.reply(message, `Hey there <@${message.user}>, I'm Gesher bot. :robot_face:
+  I'm here to help connect you to other Gesher members. I'm in development right now, but soon, I'll be able to:
+  • find members by skills (marketing, sales, strategy)
+  • introduce you to people I think you might benefit from meeting
+  • more? Talk to someone in #labs if you have a suggestion
+
+  :wave: :robot_face:`)
+})
+
+
 // Conversation, Show Skills
 // This conversation allows the user to see a list of skills they've added to gesher-bot's database.
 let showSkills = require('./conversations/show-skills')
