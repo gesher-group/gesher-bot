@@ -49,7 +49,6 @@ controller.hears(['help', 'roadmap', 'what do you do'], ['direct_message', 'ment
   :wave: :robot_face:`)
 })
 
-
 // Conversation, Show Skills
 // This conversation allows the user to see a list of skills they've added to gesher-bot's database.
 let showSkills = require('./conversations/show-skills')
