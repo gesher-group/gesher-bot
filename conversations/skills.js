@@ -1,3 +1,25 @@
+// start showSkills
+function showSkills (bot, message, db) {
+  const user = message.user
+  let skills = []
+
+  db.ref(`users/${user}`).once('value').then(snapshot => {
+    const v = snapshot.val()
+    skills = v.skills
+    let skillList = ''
+
+    for (let s in skills) {
+      if (+s === skills.length - 1) skillList += `, ${skills[s]}.`
+      else if (+s !== 0) skillList += `, ${skills[s]}`
+      else skillList = skills[0]
+    }
+
+    bot.reply(message, `<@${user}> is great at ${skillList}`)
+  })
+}
+// end showSkills
+
+// start writeSkills
 function writeSkillsHelper (newSkills, uid, db) {
   for (let s in newSkills) {
     if (newSkills[s].charAt(0) === ' ') newSkills[s].substring(1)
@@ -6,12 +28,10 @@ function writeSkillsHelper (newSkills, uid, db) {
   db.ref(`users/${uid}`).once('value').then(snapshot => {
     if (snapshot.val() !== null) {
       let oldSkills = snapshot.val().skills
-      newSkills.push(oldSkills)
+      for (let s in oldSkills) newSkills.push(oldSkills[s])
     }
 
-    db.ref('users').child(uid).set({
-      'skills': newSkills
-    })
+    db.ref('users').child(uid).set({ 'skills': newSkills })
   })
 }
 
@@ -25,17 +45,11 @@ function writeSkills (bot, message, db) {
           convo.say('Okay, cancelled.')
           convo.next()
         }
-      },
-      {
+      }, {
         pattern: '(*)',
         default: true,
         callback: (response, convo) => {
-          writeSkillsHelper(
-            response.text.split(','),
-            response.user,
-            db
-          )
-
+          writeSkillsHelper(response.text.split(','), response.user, db)
           convo.say('Skills saved!')
           convo.next()
         }
@@ -43,5 +57,9 @@ function writeSkills (bot, message, db) {
     ])
   })
 }
+// end writeSkills
 
-module.exports = { writeSkills: writeSkills }
+module.exports = {
+  showSkills: showSkills,
+  writeSkills: writeSkills
+}

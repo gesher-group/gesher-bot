@@ -51,14 +51,11 @@ controller.hears(['help', 'roadmap', 'what do you do'], ['direct_message', 'ment
 
 // Conversation, Show Skills
 // This conversation allows the user to see a list of skills they've added to gesher-bot's database.
-let showSkills = require('./conversations/show-skills')
-showSkills = showSkills.showSkills
+const { showSkills, writeSkills } = require('./conversations/skills')
 controller.hears(['show skills'], 'direct_message', (bot, message) => showSkills(bot, message, db))
 
 // Conversation, Write Skills
 // This conversation allows the user to add skills to gesher-bot's database.
-let writeSkills = require('./conversations/write-skills')
-writeSkills = writeSkills.writeSkills
 controller.hears(['write skills'], 'direct_message', (bot, message) => writeSkills(bot, message, db))
 
 controller.hears(['hello', 'hi'], 'direct_message, direct_mention, mention', (bot, message) => {
