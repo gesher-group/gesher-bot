@@ -25,6 +25,14 @@ const bot = controller.spawn({
 
 if (!bot) console.log('ERR: Bot failed to load.')
 
+controller.hears('ping', 'direct_mention', (bot, message) => {
+  bot.api.reactions.add({
+    timestamp: message.ts,
+    channel: message.channel,
+    name: 'table_tennis_paddle_and_ball'
+  })
+})
+
 controller.hears(['help', 'roadmap', 'what do you do'], ['direct_message', 'mention'], (bot, message) => {
   bot.api.reactions.add({
     timestamp: message.ts,
