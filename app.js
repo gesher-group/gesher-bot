@@ -25,7 +25,7 @@ const bot = controller.spawn({
 
 if (!bot) console.log('ERR: Bot failed to load.')
 
-controller.hears('ping', 'direct_mention', (bot, message) => {
+controller.hears(['ping'], 'direct_mention', (bot, message) => {
   bot.api.reactions.add({
     timestamp: message.ts,
     channel: message.channel,
@@ -57,9 +57,6 @@ controller.hears(['show skills'], 'direct_message', (bot, message) => showSkills
 // Conversation, Write Skills
 // This conversation allows the user to add skills to gesher-bot's database.
 controller.hears(['write skills'], 'direct_message', (bot, message) => writeSkills(bot, message, db))
-
-const { match } = require('./conversations/matching')
-match(userList, db)
 
 controller.hears(['hello', 'hi'], 'direct_message, direct_mention, mention', (bot, message) => {
   bot.api.reactions.add({
