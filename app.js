@@ -58,6 +58,16 @@ controller.hears(['show skills'], 'direct_message', (bot, message) => showSkills
 // This conversation allows the user to add skills to gesher-bot's database.
 controller.hears(['write skills'], 'direct_message', (bot, message) => writeSkills(bot, message, db))
 
+// Conversation, Show Classes
+// This conversation allows the user to see a list of classes they've added to gesher-bot's database.
+const { showClasses, writeClasses } = require('./conversations/classes')
+controller.hears(['show classes'], 'direct_message', (bot, message) => showClasses(bot, message, db))
+
+// Conversation, Write Classes
+// This conversation allows the user to add classes to gesher-bot's database.
+controller.hears(['write classes'], 'direct_message', (bot, message) => writeClasses(bot, message, db))
+
+
 controller.hears(['hello', 'hi'], 'direct_message, direct_mention, mention', (bot, message) => {
   bot.api.reactions.add({
     timestamp: message.ts,
