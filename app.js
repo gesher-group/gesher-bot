@@ -49,6 +49,11 @@ controller.hears(['help', 'roadmap', 'what do you do'], ['direct_message', 'ment
   :wave: :robot_face:`)
 })
 
+// Helper, add courses // Disabled! Uncomment two lines below to re-enable
+// This is a super-user tool to add formatted department data to Firebase.
+// const { addCourses } = require('./helpers/add-courses')
+// controller.hears(['add courses'], 'direct_message', (bot, message) => addCourses(controller, bot, message, db))
+
 // Conversation, Show Skills
 // This conversation allows the user to see a list of skills they've added to gesher-bot's database.
 const { showSkills, writeSkills } = require('./conversations/skills')
@@ -57,6 +62,46 @@ controller.hears(['show skills'], 'direct_message', (bot, message) => showSkills
 // Conversation, Write Skills
 // This conversation allows the user to add skills to gesher-bot's database.
 controller.hears(['write skills'], 'direct_message', (bot, message) => writeSkills(bot, message, db))
+
+// Conversation, Show Classes
+// This conversation allows the user to see a list of classes they've added to gesher-bot's database.
+const { showClasses, writeClasses } = require('./conversations/classes')
+controller.hears(['show classes'], 'direct_message', (bot, message) => showClasses(bot, message, db))
+
+// Conversation, Write Classes
+// This conversation allows the user to add classes to gesher-bot's database.
+controller.hears(['write classes'], 'direct_message', (bot, message) => writeClasses(bot, message, db))
+
+// Conversation, Random matching
+// This conversation allows certain users the ability to generate random matches for other Users.
+const { getRandomMatch } = require('./conversations/matching')
+controller.hears(['random'], 'direct_message', (bot, message) => {
+  bot.startConversation(message, (err, convo) => {
+    if (err) console.log('ERROR!', err)
+    convo.ask('Password Please: ', [
+      {
+        pattern: `fuck you`,
+        callback: (response, convo) => {
+          convo.say('Password Accepted')
+          db.ref(`users`).once('value').then(snapshot => {
+            const v = snapshot.val()
+            getRandomMatch(v)
+            convo.next()
+          })
+        }
+      },
+      {
+        pattern: bot.utterances.no,
+        default: true,
+        callback: (response, convo) => {
+          convo.say('Sorry Wrong Password')
+          convo.next(v)
+        }
+      }
+    ])
+  })
+})
+
 
 controller.hears(['hello', 'hi'], 'direct_message, direct_mention, mention', (bot, message) => {
   bot.api.reactions.add({
