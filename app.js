@@ -49,6 +49,11 @@ controller.hears(['help', 'roadmap', 'what do you do'], ['direct_message', 'ment
   :wave: :robot_face:`)
 })
 
+// Helper, add courses // Disabled! Uncomment two lines below to re-enable
+// This is a super-user tool to add formatted department data to Firebase.
+// const { addCourses } = require('./helpers/add-courses')
+// controller.hears(['add courses'], 'direct_message', (bot, message) => addCourses(controller, bot, message, db))
+
 // Conversation, Show Skills
 // This conversation allows the user to see a list of skills they've added to gesher-bot's database.
 const { showSkills, writeSkills } = require('./conversations/skills')

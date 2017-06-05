@@ -1,5 +1,3 @@
-//Pranav Lodha and Daniel Boles Adaptation for Classes
-
 // start showClasses
 function showClasses (bot, message, db) {
   const user = message.user
