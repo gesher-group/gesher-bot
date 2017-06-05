@@ -67,6 +67,36 @@ controller.hears(['show classes'], 'direct_message', (bot, message) => showClass
 // This conversation allows the user to add classes to gesher-bot's database.
 controller.hears(['write classes'], 'direct_message', (bot, message) => writeClasses(bot, message, db))
 
+// Conversation, Random matching
+// This conversation allows certain users the ability to generate random matches for other Users.
+const { getRandomMatch } = require('./conversations/matching')
+controller.hears(['random'], 'direct_message', (bot, message) => {
+  bot.startConversation(message, (err, convo) => {
+    if (err) console.log('ERROR!', err)
+    convo.ask('Password Please: ', [
+      {
+        pattern: `fuck you`,
+        callback: (response, convo) => {
+          convo.say('Password Accepted')
+          db.ref(`users`).once('value').then(snapshot => {
+            const v = snapshot.val()
+            getRandomMatch(v)
+            convo.next()
+          })
+        }
+      },
+      {
+        pattern: bot.utterances.no,
+        default: true,
+        callback: (response, convo) => {
+          convo.say('Sorry Wrong Password')
+          convo.next(v)
+        }
+      }
+    ])
+  })
+})
+
 
 controller.hears(['hello', 'hi'], 'direct_message, direct_mention, mention', (bot, message) => {
   bot.api.reactions.add({
