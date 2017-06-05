@@ -1,5 +1,3 @@
-//Pranav Lodha and Daniel Boles Adaptation for Classes
-
 // start showClasses
 function showClasses (bot, message, db) {
   const user = message.user
@@ -34,6 +32,12 @@ function writeClassesHelper (newclasses, uid, db) {
     }
 
     db.ref('users').child(uid).set({ 'classes': newclasses })
+
+    const school = 'cmps'
+    for (let c in cources) {
+      const { code, title } = c
+      db.ref('courses').child(school).set({ [code]: title })
+    }
   })
 }
 
