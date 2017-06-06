@@ -78,14 +78,24 @@ const { getRandomMatch } = require('./conversations/matching')
 controller.hears(['random'], 'direct_message', (bot, message) => {
   bot.startConversation(message, (err, convo) => {
     if (err) console.log('ERROR!', err)
-    convo.ask('Password Please: ', [
+    convo.ask(`What's the password?`, [
       {
         pattern: `fuck you`,
         callback: (response, convo) => {
-          convo.say('Password Accepted')
+          convo.say(`Password accepted.`)
           db.ref(`users`).once('value').then(snapshot => {
-            const v = snapshot.val()
-            getRandomMatch(v)
+            let userList = []
+
+            // Converts to array of users
+            for (let i in snapshot.val()) {
+              let props = snapshot.val()[i]
+              props.id = i
+
+              userList.push(props)
+            }
+
+            const match = getRandomMatch(userList)
+            convo.say(`Matched: \`${match[0]}\` with \`${match[1]}\`.`)
             convo.next()
           })
         }

@@ -1,4 +1,3 @@
-//
 // function getSkills (user, db) {
 //   db.ref(`users/${user}`).once('value').then(snapshot => {
 //     const v = snapshot.val()
@@ -7,14 +6,13 @@
 // }
 
 function getRandomMatch (userList, db) {
-  let user1 = getRandomIndex(userList)
-  let user2
-  while (user2 === user1) user2 = getRandomIndex(userList)
-  const match = [userList[user1], userList[user2]]
+  let user1 = getRandomUser(userList)
+  let user2 = getRandomUser(userList)
+
+  while (user2.id === user1.id) user2 = getRandomUser(userList)
+  const match = [user1.id, user2.id]
   // if (previouslyMatched(match)) return getRandomMatch(userList)
   // else{
-  userList.splice(user1, 1) // first arg is starting index, second arg is how many to be deleted from index onward of object array.
-  userList.splice(user2, 1)
   return match
   // let user1data = user1.map((userId) => {
   //   return {
@@ -48,8 +46,12 @@ function getRandomMatch (userList, db) {
 // Print to matched users the similar Skills
 // }
 
-function getRandomIndex (userList) {
-  return userList[Math.floor(Math.random() * userList.length)]
+// Returns a random user from the provided list
+// TODO: after you've created a single match, make sure to remove both users form userList. Also, watch the type of data you're dealing with. An array is not an object, and vice versa.
+function getRandomUser (userList) {
+  const randomIndex = Math.floor(Math.random() * userList.length)
+  const user = userList[randomIndex]
+  return user
 }
 
 module.exports = {
