@@ -33,6 +33,10 @@ controller.hears(['ping'], 'direct_mention', (bot, message) => {
   })
 })
 
+controller.hears(['invite'], 'direct_mention', (bot, message) => {
+  //
+})
+
 controller.hears(['help', 'roadmap', 'what do you do'], ['direct_message', 'mention'], (bot, message) => {
   bot.api.reactions.add({
     timestamp: message.ts,
