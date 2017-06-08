@@ -147,8 +147,6 @@ controller.hears(['random'], 'direct_message', (bot, message) => {
 
             const failed = userList[0] ? `Failed to find  a match for <@${userList[0].id}>` : 'Everyone was matched!'
 
-            console.log(userList)
-
             if (matches) {
               convo.say(`All done... \n\n Matched: ${matches}\n\n${failed}`)
               convo.next()
@@ -185,6 +183,17 @@ controller.hears(['hello', 'hi'], 'direct_message, direct_mention, mention', (bo
     console.log('USER : ', user)
     if (user && user.name) bot.reply(message, `'Hello, ${user.name}.`)
     else bot.reply(message, 'Hello.')
+  })
+})
+
+controller.hears(['how are you', `how you doin`, `how're you`], 'direct_message, direct_mention, mention', (bot, message) => {
+  bot.api.reactions.add({
+    timestamp: message.ts,
+    channel: message.channel,
+    name: 'robot_face'
+  }, (err, res) => {
+    if (err) bot.botkit.log('Failed to add emoji reaction :(', err)
+    bot.reply(message, 'Doing really well!')
   })
 })
 

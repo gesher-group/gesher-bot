@@ -1,8 +1,7 @@
 require('dotenv').load()
-// var request = require('request')
-var _ = require('lodash')
 var WebClient = require('@slack/client').WebClient
-var slack = new WebClient(process.env.SLACK_BOT_TOKEN)
+var web = new WebClient(process.env.SLACK_OAUTH)
+var _ = require('lodash')
 
 function getRandomUser (userList) {
   const randomIndex = Math.floor(Math.random() * userList.length)
@@ -24,8 +23,13 @@ function matchUsers (userList, db) {
     userList.splice(_.findIndex(userList, (u) => u.id === user1.id), 1)
     userList.splice(_.findIndex(userList, (u) => u.id === user2.id), 1)
 
+    const channelName = `${user1.id}_${user2.id}`.toLowerCase()
+    web.groups.create(channelName, (err, res) => {
+      if (err) console.log('error creating group: ', err)
+      console.log('Success!', res)
+    })
+
     // introduce match
-    // remove from userList
 
     // - confirm not previously matched
     // - add match data to Firebase
