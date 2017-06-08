@@ -1,12 +1,23 @@
 // Load environment variables
 require('dotenv').load()
 
+
+
+var express = require('express')
+var request = require('request')
+var bodyParser = require('body-parser')
+var app = express()
+var urlencodedParser = bodyParser.urlencoded({ extended: false })
+
+
+
+
 if (!process.env.SLACK_BOT_TOKEN) {
   console.log('Error: Specify token in environment')
   process.exit(1)
 }
 
-// Instantiate Firebase DB
+// Instantiate Firebase
 const firebaseAdmin = require('firebase-admin')
 const serviceAccount = require('./firebase-service-account-key.json')
 const firebase = firebaseAdmin.initializeApp({
@@ -18,20 +29,19 @@ const db = firebase.database()
 // Instantiate Botkit
 const Botkit = require('botkit')
 const os = require('os')
-const controller = Botkit.slackbot({ debug: false })
+const controller = Botkit.slackbot({
+  interactive_replies: true,
+  debug: false
+})
+
 const bot = controller.spawn({
+  interactive_replies: true,
   token: process.env.SLACK_BOT_TOKEN
 }).startRTM()
 
 if (!bot) console.log('ERR: Bot failed to load.')
 
-controller.hears(['ping'], 'direct_mention', (bot, message) => {
-  bot.api.reactions.add({
-    timestamp: message.ts,
-    channel: message.channel,
-    name: 'table_tennis_paddle_and_ball'
-  })
-})
+
 
 controller.hears(['help', 'roadmap', 'what do you do'], ['direct_message', 'mention'], (bot, message) => {
   bot.api.reactions.add({
@@ -58,6 +68,65 @@ controller.hears(['help', 'roadmap', 'what do you do'], ['direct_message', 'ment
 // This conversation allows the user to see a list of skills they've added to gesher-bot's database.
 const { showSkills, writeSkills } = require('./conversations/skills')
 controller.hears(['show skills'], 'direct_message', (bot, message) => showSkills(bot, message, db))
+
+const direct = ['direct_mention', 'direct_message']
+controller.hears(['ping'], direct, (bot, message) => {
+var cat1 = 'Tell me which categories most closely fits your skills?\n' +
+          ':one:Political Science\n' + ':two:Life Science\n' +
+          ':three:Engineering\n' + ':four:Sales\n' +
+          ':five:Finance\n' + ':six:Marketing\n' + ':seven:Law\n' +
+          ':eight:Managment\n'
+
+var eng = 'OK Thanks! Now what about these?'+
+            ':one:Software\n' + ':two: Hardware\n' +
+            ':three:Civil\n' + ':four:Mechanical\n' +
+            ':five:Chemical\n' + ':six:Biomedical\n' + ':seven:Environmental\n' +
+            ':eight:Agricultural\n'
+
+var market = 'OK Thanks! Now what about these?'+
+            ':one:Public Speaking\n' + ':two: Creativity\n' +
+            ':three:Negotiation\n' + ':four:Case Study\n' +
+            ':five:Social Media Stradegy\n' + ':six:Event Planning\n' +
+            ':seven:Focus Groups\n' +
+            ':eight:Consumer Service\n'
+
+
+  var emojiArray = [ 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight']
+
+  console.log('Initiating Skills Interview, my favorite!')
+
+
+  bot.startConversation(message, (err, convo) => {
+    console.log('begin', convo)
+
+    bot.reply(message,cat1 ,(err, res) => {
+      for (let em in emojiArray){
+      bot.api.reactions.add({
+
+        timestamp: res.ts,
+        //do I add the unique id
+        channel: message.channel,
+        name: emojiArray[em]
+
+
+      })
+    }
+
+
+    })
+convo.next()
+  })
+  controller.on('reaction_added', (bot, event) => {
+
+
+    console.log(event) // this will listen to future reactions, see console
+  })
+})
+
+
+
+
+
 
 // Conversation, Write Skills
 // This conversation allows the user to add skills to gesher-bot's database.
@@ -179,7 +248,7 @@ controller.hears(['what is my name', 'who am i'], 'direct_message,direct_mention
               }
             ])
             convo.next()
-          }, {'key': 'nickname'}) // store the results in field "nickname"
+          }, {'key': 'nickname'}) // store the results in field 'nickname'
 
           convo.on('end', (convo) => {
             if (convo.status === 'completed') {
@@ -360,20 +429,20 @@ controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your na
 
   bot.reply(message,
     `:robot_face: I'm ${bot.identity.name}, a bot built by the Gesher Labs team. I have been running for ${uptime} on ${hostname}.`)
-})
+  })
 
-function formatUptime (uptime) {
-  let unit = 'second'
-  if (uptime > 60) {
-    uptime = uptime / 60
-    unit = 'minute'
+  function formatUptime (uptime) {
+    let unit = 'second'
+    if (uptime > 60) {
+      uptime = uptime / 60
+      unit = 'minute'
+    }
+
+    if (uptime > 60) {
+      uptime = uptime / 60
+      unit = 'hour'
+    }
+
+    if (uptime !== 1) unit = unit + 's'
+    return `${uptime} ${unit}`
   }
-
-  if (uptime > 60) {
-    uptime = uptime / 60
-    unit = 'hour'
-  }
-
-  if (uptime !== 1) unit = unit + 's'
-  return `${uptime} ${unit}`
-}

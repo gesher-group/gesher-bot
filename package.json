@@ -15,6 +15,7 @@
   "license": "MIT",
   "dependencies": {
     "@slack/client": "^3.10.0",
+    "@slack/events-api": "^1.0.1",
     "babel": "^6.23.0",
     "body-parser": "^1.x.x",
     "botkit": "^0.5.4",
