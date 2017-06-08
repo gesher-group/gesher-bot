@@ -31,7 +31,7 @@ const bot = controller.spawn({
 if (!bot) console.log('ERR: Bot failed to load.')
 
 controller.hears(['invite'], 'direct_mention', (bot, message) => {
-  //
+  console.log(` <@${message.user}>`)
 })
 
 controller.hears(['help', 'roadmap', 'what do you do'], ['direct_message', 'mention'], (bot, message) => {
