@@ -43,6 +43,10 @@ if (!bot) console.log('ERR: Bot failed to load.')
 
 
 
+controller.hears(['invite'], 'direct_mention', (bot, message) => {
+  //
+})
+
 controller.hears(['help', 'roadmap', 'what do you do'], ['direct_message', 'mention'], (bot, message) => {
   bot.api.reactions.add({
     timestamp: message.ts,
@@ -143,14 +147,15 @@ controller.hears(['write classes'], 'direct_message', (bot, message) => writeCla
 
 // Conversation, Random matching
 // This conversation allows certain users the ability to generate random matches for other Users.
-const { getRandomMatch } = require('./conversations/matching')
+const { matchUsers } = require('./conversations/matching')
 controller.hears(['random'], 'direct_message', (bot, message) => {
   bot.startConversation(message, (err, convo) => {
     if (err) console.log('ERROR!', err)
     convo.ask(`What's the password?`, [
       {
-        pattern: `fuck you`,
+        pattern: `friend`,
         callback: (response, convo) => {
+          console.log('Password accepted')
           convo.say(`Password accepted.`)
           db.ref(`users`).once('value').then(snapshot => {
             let userList = []
@@ -163,9 +168,21 @@ controller.hears(['random'], 'direct_message', (bot, message) => {
               userList.push(props)
             }
 
-            const match = getRandomMatch(userList)
-            convo.say(`Matched: \`${match[0]}\` with \`${match[1]}\`.`)
-            convo.next()
+            const matches = matchUsers(userList).map((m) => {
+              return m.map((u) => ` <@${u}>`)
+            })
+
+            const failed = userList[0] ? `Failed to find  a match for <@${userList[0].id}>` : 'Everyone was matched!'
+
+            console.log(userList)
+
+            if (matches) {
+              convo.say(`All done... \n\n Matched: ${matches}\n\n${failed}`)
+              convo.next()
+            } else {
+              convo.say('An error occurred, check the logs.')
+              convo.next()
+            }
           })
         }
       },
@@ -173,14 +190,13 @@ controller.hears(['random'], 'direct_message', (bot, message) => {
         pattern: bot.utterances.no,
         default: true,
         callback: (response, convo) => {
-          convo.say('Sorry Wrong Password')
-          convo.next(v)
+          convo.say('Sorry, wrong password')
+          convo.next()
         }
       }
     ])
   })
 })
-
 
 controller.hears(['hello', 'hi'], 'direct_message, direct_mention, mention', (bot, message) => {
   bot.api.reactions.add({

@@ -1,13 +1,13 @@
 require('dotenv').load()
 var request = require('request')
 var WebClient = require('@slack/client').WebClient
-var web = new WebClient(process.env.SLACK_BOT_TOKEN)
+var slack = new WebClient(process.env.SLACK_BOT_TOKEN)
 
 module.exports = function addCourses (controller, bot, message, db) {
   bot.reply(message, `Okay, let's add some courses. Post a formatted JSON snippet of the department you'd like to add?`)
 
   controller.on('file_shared', (bot, message) => {
-    web.files.info(message.file_id, null, (err, res) => {
+    slack.files.info(message.file_id, null, (err, res) => {
       if (err) console.log(`⚠️ `, err)
       else {
         const options = {
