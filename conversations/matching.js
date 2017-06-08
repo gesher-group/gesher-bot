@@ -5,9 +5,16 @@
 //   })
 // }
 
+require('dotenv').load()
+// var request = require('request')
+var WebClient = require('@slack/client').WebClient
+var slack = new WebClient(process.env.SLACK_BOT_TOKEN)
+
 function getRandomMatch (userList, db) {
   let user1 = getRandomUser(userList)
   let user2 = getRandomUser(userList)
+
+  slack.groups.create() // whatevs
 
   while (user2.id === user1.id) user2 = getRandomUser(userList)
   const match = [user1.id, user2.id]
