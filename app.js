@@ -57,6 +57,7 @@ controller.hears(['help', 'roadmap', 'what do you do'], ['direct_message', 'ment
 
 // Conversation, Show Skills
 // This conversation allows the user to see a list of skills they've added to gesher-bot's database.
+/*This could be remade into using interactive messages for the sake of continuity.*/
 const { showSkills, writeSkills } = require('./conversations/skills')
 controller.hears(['show skills'], 'direct_message', (bot, message) => showSkills(bot, message, db))
 
@@ -121,7 +122,7 @@ controller.hears(['write classes'], 'direct_message', (bot, message) => writeCla
 // Conversation, Random matching
 // This conversation allows certain users the ability to generate random matches for other Users.
 const { matchUsers } = require('./conversations/matching')
-controller.hears(['random'], 'direct_message', (bot, message) => {
+controller.hears(['random'], 'direct_message, direct_mention, mention', (bot, message) => {
   bot.startConversation(message, (err, convo) => {
     if (err) console.log('ERROR!', err)
     convo.ask(`What's the password?`, [
@@ -444,3 +445,21 @@ function formatUptime (uptime) {
   if (uptime !== 1) unit = unit + 's'
   return `${uptime} ${unit}`
 }
+
+require('dotenv').load()
+var WebClient = require('@slack/client').WebClient
+var web = new WebClient(process.env.SLACK_BOT_TOKEN)
+
+const {listUsersInSlack} = require('./conversations/onboarding')
+controller.hears(['list users'], 'direct_message',(bot,message) => {
+  web.users.list(function(err,res){
+    console.log(res.members.first);
+  })
+})
+
+// function httpGet(url){
+//   var xmlHTTP = new XMLHttpRequest()
+//   xmlHTPP.open("GET", url, false)
+//   xmlHTTP.send( null )
+//   return xmlHTTP.responseText;
+// }
