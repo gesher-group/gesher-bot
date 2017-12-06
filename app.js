@@ -453,7 +453,14 @@ var web = new WebClient(process.env.SLACK_BOT_TOKEN)
 const {listUsersInSlack} = require('./conversations/onboarding')
 controller.hears(['list users'], 'direct_message',(bot,message) => {
   web.users.list(function(err,res){
-    console.log(res.members.first);
+    let arrayOfUsers = res.members
+    for(let i in arrayOfUsers){
+      if(!arrayOfUsers[i].deleted){ // need to check if the profile still exits or not
+        console.log(arrayOfUsers[i].profile.real_name_normalized + " " + arrayOfUsers[i].id) // real_name may not have been filled by user,
+                                                                  //so we must use real_name_normalized inside the profile object.
+      }
+
+    }
   })
 })
 
