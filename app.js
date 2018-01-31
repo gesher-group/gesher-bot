@@ -118,48 +118,33 @@ const { matchUsers } = require('./conversations/matching')
 controller.hears(['random'], 'direct_message, direct_mention, mention', (bot, message) => {
   bot.startConversation(message, (err, convo) => {
     if (err) console.log('ERROR!', err)
-    convo.ask(`What's the password?`, [
-      {
-        pattern: `friend`,
-        callback: (response, convo) => {
-          console.log('Password accepted')
-          convo.say(`Password accepted.`)
-          db.ref(`users`).once('value').then(snapshot => {
-            let userList = []
+    db.ref(`users`).once('value').then(snapshot => {
+      let userList = []
 
-            // Converts to array of users
-            for (let i in snapshot.val()) {
-              let props = snapshot.val()[i]
-              props.id = i
-
-              userList.push(props)
-            }
-
-            const matches = matchUsers(userList).map((m) => {
-              return m.map((u) => ` <@${u}>`)
-            })
-
-            const failed = userList[0] ? `Failed to find  a match for <@${userList[0].id}>` : 'Everyone was matched!'
-
-            if (matches) {
-              convo.say(`All done... \n\n Matched: ${matches}\n\n${failed}`)
-              convo.next()
-            } else {
-              convo.say('An error occurred, check the logs.')
-              convo.next()
-            }
-          })
-        }
-      },
-      {
-        pattern: bot.utterances.no,
-        default: true,
-        callback: (response, convo) => {
-          convo.say('Sorry, wrong password')
-          convo.next()
-        }
+      // Converts to array of users
+      for (let i in snapshot.val()) {
+        let props = snapshot.val()[i]
+        props.id = i
+        console.log(props)
+        userList.push(props)
       }
-    ])
+
+      const matches = matchUsers(userList).map((m) => {
+        return m.map((u) => ` <@${u}>`)
+      })
+      console.log(matches + 'found')
+
+      const failed = userList[0] ? `Failed to find  a match for <@${userList[0].id}>` : 'Everyone was matched!'
+      console.log(userList[0].id + 'is the first item in user list')
+
+      if (matches) {
+        convo.say(`All done... \n\n Matched: ${matches}`)
+        convo.next()
+      } else {
+        convo.say('An error occurred, check the logs.')
+        convo.next()
+      }
+    })
   })
 })
 
@@ -299,14 +284,32 @@ var WebClient = require('@slack/client').WebClient
 var web = new WebClient(process.env.SLACK_BOT_TOKEN)
 
 const {listUsersInSlack} = require('./conversations/onboarding')
-controller.hears(['list users'], 'direct_message',(bot,message) => {
+controller.hears(['list'], 'direct_message',(bot,message) => {
+  bot.reply(message, 'Hello <@'+message.user+'>' + '\n' + 'your slack id is: ' + message.user);
+ var ref = db.ref('users')
   web.users.list(function(err,res){
     let arrayOfUsers = res.members
     for(let i in arrayOfUsers){
-      if(!arrayOfUsers[i].deleted){ // need to check if the profile still exits or not
+      if(!arrayOfUsers[i].deleted ){ // need to check if the profile still exits or not
         console.log(arrayOfUsers[i].profile.real_name_normalized + " " + arrayOfUsers[i].id) // real_name may not have been filled by user,
                                                                   //so we must use real_name_normalized inside the profile object.
-      }
+        
+         db.ref('gehser-bot').once('value', function(snapshot){
+          if(!snapshot.hasChild('users')){
+            var name = arrayOfUsers[i].profile.real_name_normalized
+            var id = arrayOfUsers[i].id
+            
+            ref.child(name).set({
+              name: name,
+              id: id,
+              matches: 0
+
+            })
+          }
+          
+        })
+       
+                                                                }
 
     }
   })

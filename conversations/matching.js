@@ -33,7 +33,7 @@ function getRandomConvoName () {
 function matchUsers (userList, db) {
   let matches = []
 
-  while (userList.length > 1) {
+  if (userList.length > 1) {
     let user1 = getRandomUser(userList)
     let user2 = getRandomUser(userList)
 
