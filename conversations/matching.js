@@ -30,15 +30,16 @@ function getRandomConvoName () {
   return `${adjective}-${noun}`
 }
 
-function matchUsers (userList, db) {
+function matchUsers (user, userList, db) {
   let matches = []
 
   if (userList.length > 1) {
-    let user1 = getRandomUser(userList)
+    let user1 = user
+    console.log(user1 + "type of user 1")
     let user2 = getRandomUser(userList)
 
-    while (user2.id === user1.id) user2 = getRandomUser(userList)
-    const match = [user1.id, user2.id]
+    while (user2.id === user1) user2 = getRandomUser(userList)
+    const match = [user1, user2.id]
     matches.push(match)
 
     userList.splice(_.findIndex(userList, (u) => u.id === user1.id), 1)

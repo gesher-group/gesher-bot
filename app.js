@@ -114,6 +114,7 @@ if (!bot) console.log('ERR: Bot failed to load.')
 
 // Conversation, Random matching
 // This conversation allows certain users the ability to generate random matches for other Users.
+
 const { matchUsers } = require('./conversations/matching')
 controller.hears(['random'], 'direct_message, direct_mention, mention', (bot, message) => {
   bot.startConversation(message, (err, convo) => {
@@ -125,18 +126,22 @@ controller.hears(['random'], 'direct_message, direct_mention, mention', (bot, me
       for (let i in snapshot.val()) {
         let props = snapshot.val()[i]
         props.id = i
-        console.log(props)
         userList.push(props)
       }
 
-      const matches = matchUsers(userList).map((m) => {
+      bot.api.users.info({user: message.user}, (error, response) => {
+        let {name, real_name} = response.user
+        user = real_name
+    
+      console.log(user + "user's real name" + "" + name)
+
+      const matches = matchUsers(user,userList).map((m) => {
         return m.map((u) => ` <@${u}>`)
       })
       console.log(matches + 'found')
 
       const failed = userList[0] ? `Failed to find  a match for <@${userList[0].id}>` : 'Everyone was matched!'
-      console.log(userList[0].id + 'is the first item in user list')
-
+      
       if (matches) {
         convo.say(`All done... \n\n Matched: ${matches}`)
         convo.next()
@@ -144,6 +149,7 @@ controller.hears(['random'], 'direct_message, direct_mention, mention', (bot, me
         convo.say('An error occurred, check the logs.')
         convo.next()
       }
+    })
     })
   })
 })
@@ -254,7 +260,6 @@ controller.hears(['shutdown'], 'direct_message,direct_mention,mention', (bot, me
 })
 
 
-
 controller.hears(['uptime', 'identify yourself', 'who are you', 'what is your name'], 'direct_message, direct_mention, mention', (bot, message) => {
   const hostname = os.hostname()
   const uptime = formatUptime(process.uptime())
@@ -283,7 +288,7 @@ require('dotenv').load()
 var WebClient = require('@slack/client').WebClient
 var web = new WebClient(process.env.SLACK_BOT_TOKEN)
 
-const {listUsersInSlack} = require('./conversations/onboarding')
+//const {listUsersInSlack} = require('./conversations/onboarding')
 controller.hears(['list'], 'direct_message',(bot,message) => {
   bot.reply(message, 'Hello <@'+message.user+'>' + '\n' + 'your slack id is: ' + message.user);
  var ref = db.ref('users')
@@ -294,8 +299,8 @@ controller.hears(['list'], 'direct_message',(bot,message) => {
         console.log(arrayOfUsers[i].profile.real_name_normalized + " " + arrayOfUsers[i].id) // real_name may not have been filled by user,
                                                                   //so we must use real_name_normalized inside the profile object.
         
-         db.ref('gehser-bot').once('value', function(snapshot){
-          if(!snapshot.hasChild('users')){
+         db.ref('users').once('value', function(snapshot){
+          if(snapshot.val() == null){
             var name = arrayOfUsers[i].profile.real_name_normalized
             var id = arrayOfUsers[i].id
             
