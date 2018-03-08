@@ -30,90 +30,18 @@ const bot = controller.spawn({
 
 if (!bot) console.log('ERR: Bot failed to load.')
 
-// controller.hears(['invite'], 'direct_mention', (bot, message) => {
-//   console.log(` <@${message.user}>`)
-// })
 
-//   bot.reply(message, `Hey there <@${message.user}>, I'm Gesher bot. :robot_face:
-//   I'm here to help connect you to other Gesher members. I'm in development right now, but soon, I'll be able to:
-//   • find members by skills (marketing, sales, strategy)
-//   • introduce you to people I think you might benefit from meeting
-//   • more? Talk to someone in #labs if you have a suggestion
+controller.hears(['test'],'direct_message, direct_mention, mention',function(bot, message) {
 
-//   :wave: :robot_face:`)
-// })
+  // do something!
+  bot.reply(message, 'I heard a message. You are ' + message.user)
 
-// // Helper, add courses // Disabled! Uncomment two lines below to re-enable
-// // This is a super-user tool to add formatted department data to Firebase.
-// // const { addCourses } = require('./helpers/add-courses')
-// // controller.hears(['add courses'], 'direct_message', (bot, message) => addCourses(controller, bot, message, db))
+//message.user is the USER ID
 
-// // Conversation, Show Skills
-// // This conversation allows the user to see a list of skills they've added to gesher-bot's database.
-// /*This could be remade into using interactive messages for the sake of continuity.*/
-// const { showSkills, writeSkills } = require('./conversations/skills')
-// controller.hears(['show skills'], 'direct_message', (bot, message) => showSkills(bot, message, db))
+  
 
-// const direct = ['direct_mention', 'direct_message']
-// controller.hears(['ping'], direct, (bot, message) => {
-//   var cat1 = 'Tell me which categories most closely fits your skills?\n' +
-//           ':one:Political Science\n' + ':two:Life Science\n' +
-//           ':three:Engineering\n' + ':four:Sales\n' +
-//           ':five:Finance\n' + ':six:Marketing\n' + ':seven:Law\n' +
-//           ':eight:Managment\n'
+});
 
-// var eng = 'OK Thanks! Now what about these?' +
-//             ':one:Software\n' + ':two: Hardware\n' +
-//             ':three:Civil\n' + ':four:Mechanical\n' +
-//             ':five:Chemical\n' + ':six:Biomedical\n' + ':seven:Environmental\n' +
-//             ':eight:Agricultural\n'
-
-// var market = 'OK Thanks! Now what about these?' +
-//             ':one:Public Speaking\n' + ':two: Creativity\n' +
-//             ':three:Negotiation\n' + ':four:Case Study\n' +
-//             ':five:Social Media Stradegy\n' + ':six:Event Planning\n' +
-//             ':seven:Focus Groups\n' +
-//             ':eight:Consumer Service\n'
-//   var emojiArray = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight']
-
-//   console.log('Initiating Skills Interview, my favorite!')
-//   bot.startConversation(message, (err, convo) => {
-//     if (err) console.log('ERROR!', err)
-//     console.log('begin', convo)
-//     bot.reply(message, cat1, (err, res) => {
-//       if (err) console.log('ERROR!', err)
-//       for (let em in emojiArray) {
-//         bot.api.reactions.add({
-
-//           timestamp: res.ts,
-//           channel: message.channel,
-//           name: emojiArray[em]
-
-//         })
-//       }
-//     })
-//     convo.next()
-//   })
-//   controller.on('reaction_added', (bot, event) => {
-//     console.log(event) // this will listen to future reactions, see console
-//   })
-// })
-
-// Conversation, Write Skills
-// // This conversation allows the user to add skills to gesher-bot's database.
-// controller.hears(['write skills'], 'direct_message', (bot, message) => writeSkills(bot, message, db))
-
-// // Conversation, Show Classes
-// // This conversation allows the user to see a list of classes they've added to gesher-bot's database.
-// const { showClasses, writeClasses } = require('./conversations/classes')
-// controller.hears(['show classes'], 'direct_message', (bot, message) => showClasses(bot, message, db))
-
-// // Conversation, Write Classes
-// // This conversation allows the user to add classes to gesher-bot's database.
-// controller.hears(['write classes'], 'direct_message', (bot, message) => writeClasses(bot, message, db))
-
-// Conversation, Random matching
-// This conversation allows certain users the ability to generate random matches for other Users.
 
 const { matchUsers } = require('./conversations/matching')
 controller.hears(['random'], 'direct_message, direct_mention, mention', (bot, message) => {
@@ -136,14 +64,14 @@ controller.hears(['random'], 'direct_message, direct_mention, mention', (bot, me
       console.log(user + "user's real name" + "" + name)
 
       const matches = matchUsers(user,userList).map((m) => {
-        return m.map((u) => ` <@${u}>`)
+        return m.map((u) => ` ${u}`)
       })
       console.log(matches + 'found')
 
       const failed = userList[0] ? `Failed to find  a match for <@${userList[0].id}>` : 'Everyone was matched!'
       
       if (matches) {
-        convo.say(`All done... \n\n Matched: ${matches}`)
+        convo.say(`All done! \n\n${matches[0][0]} you are now matched with${matches[0][1]}. \n\n Don't be a stranger! A new channel has been made between you two.`)
         convo.next()
       } else {
         convo.say('An error occurred, check the logs.')
@@ -153,24 +81,6 @@ controller.hears(['random'], 'direct_message, direct_mention, mention', (bot, me
     })
   })
 })
-
-// controller.hears(['hello', 'hi'], 'direct_message, direct_mention, mention', (bot, message) => {
-//   bot.api.reactions.add({
-//     timestamp: message.ts,
-//     channel: message.channel,
-//     name: 'robot_face'
-//   }, (err, res) => {
-//     if (err) bot.botkit.log('Failed to add emoji reaction :(', err)
-//   })
-
-//   controller.storage.users.get(message.user, (err, user) => {
-//     if (err) console.log('ERROR!', err)
-//     console.log('USER : ', user)
-//     if (user && user.name) bot.reply(message, `'Hello, ${user.name}.`)
-//     else bot.reply(message, 'Hello.')
-//   })
-// })
-
 
 
 controller.hears(['what is my name', 'who am i'], 'direct_message,direct_mention,mention', (bot, message) => {
